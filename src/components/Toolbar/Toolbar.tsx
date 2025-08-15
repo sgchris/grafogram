@@ -12,7 +12,7 @@ const tools: { type: ShapeType; icon: string; label: string; key: string }[] = [
     { type: 'arrow', icon: '➡️', label: 'Arrow', key: '2' },
     { type: 'text', icon: 'T', label: 'Text', key: '3' },
   { type: 'line', icon: '📏', label: 'Line', key: '4' },
-  { type: 'circle', icon: '○', label: 'Circle', key: '5' },
+  { type: 'ellipse', icon: '⭕', label: 'Ellipse', key: '5' },
   { type: 'eraser', icon: '🧽', label: 'Eraser', key: '6' },
 ];
 

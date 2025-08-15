@@ -51,7 +51,7 @@
   cursor: crosshair;
 }
 
-.canvas-container[data-tool="circle"] .drawing-canvas {
+.canvas-container[data-tool="ellipse"] .drawing-canvas {
   cursor: crosshair;
 }
 

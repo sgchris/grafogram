@@ -19,7 +19,7 @@ export const useDrawingTool = () => {
           '2': 'arrow',
           '3': 'text',
           '4': 'line',
-          '5': 'circle',
+          '5': 'ellipse',
           '6': 'eraser',
         };
         setSelectedTool(toolMap[key]);

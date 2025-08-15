@@ -129,17 +129,26 @@ export const isPointInRectangle = (point: Point, rectStart: Point, rectEnd: Poin
 };
 
 /**
- * Check if a point is near a circle's circumference
+ * Check if a point is near an ellipse's circumference
  */
-export const isPointNearCircle = (point: Point, circleStart: Point, circleEnd: Point, tolerance: number = 5): boolean => {
-  const centerX = (circleStart.x + circleEnd.x) / 2;
-  const centerY = (circleStart.y + circleEnd.y) / 2;
-  const radius = Math.sqrt(
-    Math.pow(circleEnd.x - circleStart.x, 2) + Math.pow(circleEnd.y - circleStart.y, 2)
-  ) / 2;
+export const isPointNearEllipse = (point: Point, ellipseStart: Point, ellipseEnd: Point, tolerance: number = 5): boolean => {
+  const centerX = (ellipseStart.x + ellipseEnd.x) / 2;
+  const centerY = (ellipseStart.y + ellipseEnd.y) / 2;
+  const radiusX = Math.abs(ellipseEnd.x - ellipseStart.x) / 2;
+  const radiusY = Math.abs(ellipseEnd.y - ellipseStart.y) / 2;
   
-  const distFromCenter = distance(point.x, point.y, centerX, centerY);
-  return Math.abs(distFromCenter - radius) <= tolerance;
+  // Avoid division by zero
+  if (radiusX === 0 || radiusY === 0) return false;
+  
+  // Transform point to ellipse coordinate system (normalize to unit circle)
+  const normalizedX = (point.x - centerX) / radiusX;
+  const normalizedY = (point.y - centerY) / radiusY;
+  
+  // Calculate distance from center in normalized space
+  const normalizedDist = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
+  
+  // Check if point is near the ellipse circumference (distance ≈ 1 in normalized space)
+  return Math.abs(normalizedDist - 1) <= tolerance / Math.min(radiusX, radiusY);
 };
 
 /**
@@ -178,8 +187,8 @@ export const isPointCollidingWithShape = (point: Point, shape: Shape): boolean =
       return distance(point.x, point.y, shape.endPoint.x, shape.endPoint.y) <= 15;
     case 'rectangle':
       return isPointInRectangle(point, shape.startPoint, shape.endPoint);
-    case 'circle':
-      return isPointNearCircle(point, shape.startPoint, shape.endPoint);
+    case 'ellipse':
+      return isPointNearEllipse(point, shape.startPoint, shape.endPoint);
     case 'text':
       return isPointNearText(point, shape.startPoint, shape.text || '');
     default:

@@ -46,8 +46,8 @@ export class DrawingEngine {
       case 'rectangle':
         this.drawRectangle(shape.startPoint, shape.endPoint);
         break;
-      case 'circle':
-        this.drawCircle(shape.startPoint, shape.endPoint);
+      case 'ellipse':
+        this.drawEllipse(shape.startPoint, shape.endPoint);
         break;
       case 'text':
         this.drawText(shape.text || '', shape.startPoint);
@@ -130,17 +130,16 @@ export class DrawingEngine {
   }
 
   /**
-   * Draw a circle
+   * Draw an ellipse
    */
-  private drawCircle(start: Point, end: Point): void {
+  private drawEllipse(start: Point, end: Point): void {
     const centerX = (start.x + end.x) / 2;
     const centerY = (start.y + end.y) / 2;
-    const radius = Math.sqrt(
-      Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)
-    ) / 2;
+    const radiusX = Math.abs(end.x - start.x) / 2;
+    const radiusY = Math.abs(end.y - start.y) / 2;
 
     this.ctx.beginPath();
-    this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    this.ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
     this.ctx.stroke();
   }
 
