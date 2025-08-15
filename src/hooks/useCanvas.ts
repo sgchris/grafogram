@@ -29,6 +29,7 @@ export const useCanvas = (selectedTool: ShapeType) => {
 	const [isErasing, setIsErasing] = useState(false);
 	const [isMoving, setIsMoving] = useState(false);
 	const [selectedShape, setSelectedShape] = useState<Shape | null>(null);
+	const [hoveredShape, setHoveredShape] = useState<Shape | null>(null);
 	const [dragOffset, setDragOffset] = useState<Point>({ x: 0, y: 0 });
 	const [textInput, setTextInput] = useState<{
 		position: Point;
@@ -71,12 +72,19 @@ export const useCanvas = (selectedTool: ShapeType) => {
 	// Redraw canvas when shapes change
 	useEffect(() => {
 		if (drawingEngine) {
-			drawingEngine.drawShapes(shapes);
+			drawingEngine.drawShapes(shapes, hoveredShape);
 			if (currentShape) {
 				drawingEngine.drawShape(currentShape);
 			}
 		}
-	}, [shapes, currentShape, drawingEngine]);
+	}, [shapes, currentShape, drawingEngine, hoveredShape]);
+
+	// Clear hover state when tool changes
+	useEffect(() => {
+		if (selectedTool !== "move") {
+			setHoveredShape(null);
+		}
+	}, [selectedTool]);
 
 	// Debounced save function
 	const debouncedSave = useCallback(
@@ -184,12 +192,18 @@ export const useCanvas = (selectedTool: ShapeType) => {
 		[selectedTool, shapes, pushToHistory]
 	);
 
-	const handleMouseMove = useCallback(
+		const handleMouseMove = useCallback(
 		(event: React.MouseEvent<HTMLCanvasElement>) => {
 			const canvas = canvasRef.current;
 			if (!canvas) return;
 
 			const mousePos = getMousePos(canvas, event.nativeEvent);
+			
+			// Handle move tool hover detection
+			if (selectedTool === "move" && !isMoving) {
+				const shapeUnderCursor = findShapeAtPoint(mousePos, shapes);
+				setHoveredShape(shapeUnderCursor);
+			}
 			
 			// Handle eraser drag
 			if (isErasing && selectedTool === "eraser") {
@@ -237,9 +251,7 @@ export const useCanvas = (selectedTool: ShapeType) => {
 			);
 		},
 		[isDrawing, currentShape, isErasing, selectedTool, shapes, isMoving, selectedShape, dragOffset]
-	);
-
-	const handleMouseUp = useCallback(() => {
+	);	const handleMouseUp = useCallback(() => {
 		if (isErasing) {
 			setIsErasing(false);
 			return;
@@ -355,5 +367,6 @@ export const useCanvas = (selectedTool: ShapeType) => {
 		handleRedo,
 		clearCanvas,
 		selectedShape,
+		hoveredShape,
 	};
 };

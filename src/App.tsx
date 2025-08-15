@@ -22,7 +22,11 @@ const App: React.FC = () => {
     handleUndo,
     handleRedo,
     clearCanvas,
+    hoveredShape,
+    selectedShape,
   } = useCanvas(selectedTool);
+
+  const isMoving = selectedTool === 'move' && selectedShape !== null;
 
   const handleClearCanvas = () => {
     setShowClearModal(true);
@@ -62,6 +66,8 @@ const App: React.FC = () => {
           onMouseUp={handleMouseUp}
           textInput={textInput}
           onTextSubmit={handleTextSubmit}
+          hoveredShape={hoveredShape}
+          isMoving={isMoving}
         />
       </div>
 

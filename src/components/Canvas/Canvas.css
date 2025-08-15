@@ -64,7 +64,15 @@
 }
 
 .canvas-container[data-tool="move"] .drawing-canvas {
-  cursor: move;
+  cursor: default;
+}
+
+.canvas-container[data-tool="move"] .drawing-canvas.can-move {
+  cursor: grab;
+}
+
+.canvas-container[data-tool="move"] .drawing-canvas.is-moving {
+  cursor: grabbing;
 }
 
 /* Text Modal Styles */

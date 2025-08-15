@@ -19,20 +19,35 @@ export class DrawingEngine {
   }
 
   /**
-   * Draw all shapes
+   * Draw all shapes with optional highlighting
    */
-  drawShapes(shapes: Shape[]): void {
+  drawShapes(shapes: Shape[], hoveredShape?: Shape | null): void {
     this.clear();
-    shapes.forEach(shape => this.drawShape(shape));
+    shapes.forEach(shape => {
+      const isHovered = hoveredShape !== null && hoveredShape !== undefined && shape.id === hoveredShape.id;
+      this.drawShape(shape, isHovered);
+    });
   }
 
   /**
-   * Draw a single shape
+   * Draw a single shape with optional highlighting
    */
-  drawShape(shape: Shape): void {
+  drawShape(shape: Shape, isHovered: boolean = false): void {
     this.ctx.save();
-    this.ctx.strokeStyle = shape.style.color;
-    this.ctx.lineWidth = shape.style.strokeWidth;
+    
+    // Apply hover effect
+    if (isHovered) {
+      this.ctx.strokeStyle = '#3498db'; // Blue highlight color
+      this.ctx.lineWidth = shape.style.strokeWidth + 2; // Thicker line
+      this.ctx.shadowColor = '#3498db';
+      this.ctx.shadowBlur = 8;
+      this.ctx.shadowOffsetX = 0;
+      this.ctx.shadowOffsetY = 0;
+    } else {
+      this.ctx.strokeStyle = shape.style.color;
+      this.ctx.lineWidth = shape.style.strokeWidth;
+    }
+    
     this.ctx.lineCap = 'round';
     this.ctx.lineJoin = 'round';
 

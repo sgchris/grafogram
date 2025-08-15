@@ -10,6 +10,8 @@ interface CanvasProps {
   onMouseUp: () => void;
   textInput: { position: Point; visible: boolean };
   onTextSubmit: (text: string) => void;
+  hoveredShape?: any;
+  isMoving?: boolean;
 }
 
 const Canvas: React.FC<CanvasProps> = ({
@@ -20,6 +22,8 @@ const Canvas: React.FC<CanvasProps> = ({
   onMouseUp,
   textInput,
   onTextSubmit,
+  hoveredShape,
+  isMoving = false,
 }) => {
   const [textValue, setTextValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -105,11 +109,24 @@ const Canvas: React.FC<CanvasProps> = ({
 
   const modalPosition = textInput.visible ? getModalPosition(textInput.position) : { left: 0, top: 0 };
 
+  // Generate dynamic canvas classes
+  const getCanvasClasses = () => {
+    let classes = "drawing-canvas";
+    if (selectedTool === "move") {
+      if (isMoving) {
+        classes += " is-moving";
+      } else if (hoveredShape) {
+        classes += " can-move";
+      }
+    }
+    return classes;
+  };
+
   return (
     <div className="canvas-container" data-tool={selectedTool}>
       <canvas
         ref={canvasRef}
-        className="drawing-canvas"
+        className={getCanvasClasses()}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}

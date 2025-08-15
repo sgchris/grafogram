@@ -36,7 +36,7 @@ src/
 ### Drawing Capabilities
 - **Shape Drawing**: Lines, arrows, rectangles, circles, text
 - **Interaction**: Mouse press-drag-release pattern for shape creation
-- **Keyboard Shortcuts**: Numbers 1-5 for shape selection
+- **Keyboard Shortcuts**: Numbers 1-7 for shape and tools selection
 - **Undo/Redo**: History management for all drawing operations
 
 ### UI Design
