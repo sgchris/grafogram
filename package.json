@@ -1,7 +1,7 @@
 {
-  "name": "sketch",
+  "name": "grafogram",
   "version": "1.0.0",
-  "description": "Online Sketch Board - A React-based drawing application",
+  "description": "Online Sketch Board - A diagrams drawing application",
   "private": true,
   "scripts": {
     "start": "react-scripts start",
@@ -10,7 +10,7 @@
     "eject": "react-scripts eject"
   },
   "keywords": [
-    "react",
+    "grafogram",
     "sketch",
     "drawing",
     "canvas"
