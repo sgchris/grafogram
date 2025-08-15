@@ -72,16 +72,16 @@ export const useCanvas = (selectedTool: ShapeType) => {
 	// Redraw canvas when shapes change
 	useEffect(() => {
 		if (drawingEngine) {
-			drawingEngine.drawShapes(shapes, hoveredShape);
+			drawingEngine.drawShapes(shapes, hoveredShape, selectedTool);
 			if (currentShape) {
-				drawingEngine.drawShape(currentShape);
+				drawingEngine.drawShape(currentShape, false, selectedTool);
 			}
 		}
-	}, [shapes, currentShape, drawingEngine, hoveredShape]);
+	}, [shapes, currentShape, drawingEngine, hoveredShape, selectedTool]);
 
 	// Clear hover state when tool changes
 	useEffect(() => {
-		if (selectedTool !== "move") {
+		if (selectedTool !== "move" && selectedTool !== "eraser") {
 			setHoveredShape(null);
 		}
 	}, [selectedTool]);
@@ -201,6 +201,12 @@ export const useCanvas = (selectedTool: ShapeType) => {
 			
 			// Handle move tool hover detection
 			if (selectedTool === "move" && !isMoving) {
+				const shapeUnderCursor = findShapeAtPoint(mousePos, shapes);
+				setHoveredShape(shapeUnderCursor);
+			}
+			
+			// Handle eraser tool hover detection
+			if (selectedTool === "eraser" && !isErasing) {
 				const shapeUnderCursor = findShapeAtPoint(mousePos, shapes);
 				setHoveredShape(shapeUnderCursor);
 			}

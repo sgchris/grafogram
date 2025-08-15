@@ -21,25 +21,31 @@ export class DrawingEngine {
   /**
    * Draw all shapes with optional highlighting
    */
-  drawShapes(shapes: Shape[], hoveredShape?: Shape | null): void {
+  drawShapes(shapes: Shape[], hoveredShape?: Shape | null, selectedTool?: ShapeType): void {
     this.clear();
     shapes.forEach(shape => {
       const isHovered = hoveredShape !== null && hoveredShape !== undefined && shape.id === hoveredShape.id;
-      this.drawShape(shape, isHovered);
+      this.drawShape(shape, isHovered, selectedTool);
     });
   }
 
   /**
    * Draw a single shape with optional highlighting
    */
-  drawShape(shape: Shape, isHovered: boolean = false): void {
+  drawShape(shape: Shape, isHovered: boolean = false, selectedTool?: ShapeType): void {
     this.ctx.save();
     
     // Apply hover effect
     if (isHovered) {
-      this.ctx.strokeStyle = '#3498db'; // Blue highlight color
+      // Choose highlight color based on selected tool
+      if (selectedTool === 'eraser') {
+        this.ctx.strokeStyle = '#dc3545'; // Dark red for eraser
+        this.ctx.shadowColor = '#dc3545';
+      } else {
+        this.ctx.strokeStyle = '#3498db'; // Blue for move tool
+        this.ctx.shadowColor = '#3498db';
+      }
       this.ctx.lineWidth = shape.style.strokeWidth + 2; // Thicker line
-      this.ctx.shadowColor = '#3498db';
       this.ctx.shadowBlur = 8;
       this.ctx.shadowOffsetX = 0;
       this.ctx.shadowOffsetY = 0;

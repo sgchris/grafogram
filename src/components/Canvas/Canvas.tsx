@@ -118,6 +118,10 @@ const Canvas: React.FC<CanvasProps> = ({
       } else if (hoveredShape) {
         classes += " can-move";
       }
+    } else if (selectedTool === "eraser") {
+      if (hoveredShape) {
+        classes += " can-erase";
+      }
     }
     return classes;
   };
