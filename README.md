@@ -28,11 +28,11 @@ Runs the app in development mode at [http://localhost:3000](http://localhost:300
 ## Usage
 
 1. Select a drawing tool from the toolbar or use keyboard shortcuts:
-   - `1` - Line
+   - `1` - Rectangle
    - `2` - Arrow
-   - `3` - Rectangle
-   - `4` - Circle
-   - `5` - Text
+   - `3` - Text
+   - `4` - Line
+   - `5` - Circle
 
 2. Click and drag on the canvas to draw shapes
 3. Use Ctrl+Z/Ctrl+Y for undo/redo
