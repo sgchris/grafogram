@@ -1,0 +1,40 @@
+import { useState, useCallback, useEffect } from 'react';
+import { ShapeType } from '../types';
+
+/**
+ * Custom hook for managing drawing tool selection
+ */
+export const useDrawingTool = () => {
+  const [selectedTool, setSelectedTool] = useState<ShapeType>('line');
+
+  // Handle keyboard shortcuts for tool selection
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Only handle number keys 1-5
+      const key = event.key;
+      if (key >= '1' && key <= '5') {
+        event.preventDefault();
+        const toolMap: Record<string, ShapeType> = {
+          '1': 'line',
+          '2': 'arrow',
+          '3': 'rectangle',
+          '4': 'circle',
+          '5': 'text',
+        };
+        setSelectedTool(toolMap[key]);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
+  const selectTool = useCallback((tool: ShapeType) => {
+    setSelectedTool(tool);
+  }, []);
+
+  return {
+    selectedTool,
+    selectTool,
+  };
+};

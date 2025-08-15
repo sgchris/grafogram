@@ -1,0 +1,59 @@
+.canvas-container {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 60px);
+  background-color: #f8f9fa;
+  overflow: hidden;
+}
+
+.drawing-canvas {
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  background-color: #f8f9fa;
+  display: block;
+}
+
+.drawing-canvas:active {
+  cursor: crosshair;
+}
+
+.text-input {
+  background-color: white;
+  border: 2px solid #3498db;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  color: #2c3e50;
+  outline: none;
+  z-index: 1001;
+  min-width: 100px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.text-input:focus {
+  border-color: #2980b9;
+  box-shadow: 0 2px 12px rgba(52, 152, 219, 0.3);
+}
+
+/* Custom cursor styles for different tools */
+.canvas-container[data-tool="line"] .drawing-canvas {
+  cursor: crosshair;
+}
+
+.canvas-container[data-tool="arrow"] .drawing-canvas {
+  cursor: crosshair;
+}
+
+.canvas-container[data-tool="rectangle"] .drawing-canvas {
+  cursor: crosshair;
+}
+
+.canvas-container[data-tool="circle"] .drawing-canvas {
+  cursor: crosshair;
+}
+
+.canvas-container[data-tool="text"] .drawing-canvas {
+  cursor: text;
+}
