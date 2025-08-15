@@ -14,7 +14,7 @@ const TopBar: React.FC<TopBarProps> = ({ onUndo, onRedo, onClear, canUndo, canRe
   return (
     <div className="top-bar">
       <div className="app-title">
-        <h1>Online Sketch Board</h1>
+        <h1><u>G</u>rafogram - Online Sketch Board</h1>
         {hasUnsavedChanges && (
           <div className="save-indicator">
             <span className="save-status">●</span>
