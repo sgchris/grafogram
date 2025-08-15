@@ -12,6 +12,7 @@ const App: React.FC = () => {
     textInput,
     canUndo,
     canRedo,
+    hasUnsavedChanges,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
@@ -29,6 +30,7 @@ const App: React.FC = () => {
         onClear={clearCanvas}
         canUndo={canUndo}
         canRedo={canRedo}
+        hasUnsavedChanges={hasUnsavedChanges}
       />
       
       <div className="main-content">

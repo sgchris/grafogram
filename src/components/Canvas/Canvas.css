@@ -22,19 +22,20 @@
   background-color: white;
   border: 2px solid #3498db;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 6px 10px;
   font-size: 16px;
   font-family: Arial, sans-serif;
   color: #2c3e50;
   outline: none;
-  z-index: 1001;
-  min-width: 100px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 150px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
 }
 
 .text-input:focus {
   border-color: #2980b9;
-  box-shadow: 0 2px 12px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4);
 }
 
 /* Custom cursor styles for different tools */

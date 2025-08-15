@@ -46,6 +46,7 @@ const Canvas: React.FC<CanvasProps> = ({
   }, [canvasRef]);
 
   const handleTextKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    event.stopPropagation(); // Prevent interference with other keyboard shortcuts
     if (event.key === 'Enter') {
       onTextSubmit(inputValue);
       setInputValue('');
@@ -56,7 +57,12 @@ const Canvas: React.FC<CanvasProps> = ({
   };
 
   const handleTextBlur = () => {
-    onTextSubmit(inputValue);
+    // Only submit if there's actual text content
+    if (inputValue.trim()) {
+      onTextSubmit(inputValue);
+    } else {
+      onTextSubmit('');
+    }
     setInputValue('');
   };
 
@@ -78,14 +84,16 @@ const Canvas: React.FC<CanvasProps> = ({
           className="text-input"
           style={{
             position: 'absolute',
-            left: textInput.position.x,
-            top: textInput.position.y,
+            left: Math.max(0, Math.min(textInput.position.x, window.innerWidth - 200)),
+            top: Math.max(0, Math.min(textInput.position.y, window.innerHeight - 100)),
+            zIndex: 1000,
           }}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleTextKeyDown}
           onBlur={handleTextBlur}
           placeholder="Enter text..."
+          autoFocus
         />
       )}
     </div>

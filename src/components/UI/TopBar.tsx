@@ -7,13 +7,20 @@ interface TopBarProps {
   onClear: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  hasUnsavedChanges: boolean;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ onUndo, onRedo, onClear, canUndo, canRedo }) => {
+const TopBar: React.FC<TopBarProps> = ({ onUndo, onRedo, onClear, canUndo, canRedo, hasUnsavedChanges }) => {
   return (
     <div className="top-bar">
       <div className="app-title">
         <h1>Online Sketch Board</h1>
+        {hasUnsavedChanges && (
+          <div className="save-indicator">
+            <span className="save-status">●</span>
+            <span className="save-text">Auto-saving...</span>
+          </div>
+        )}
       </div>
       
       <div className="controls">

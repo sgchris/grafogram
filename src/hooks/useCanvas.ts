@@ -14,6 +14,8 @@ export const useCanvas = (selectedTool: ShapeType) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentShape, setCurrentShape] = useState<Shape | null>(null);
   const [drawingEngine, setDrawingEngine] = useState<DrawingEngine | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [textInput, setTextInput] = useState<{ position: Point; visible: boolean }>({
     position: { x: 0, y: 0 },
     visible: false,
@@ -62,6 +64,7 @@ export const useCanvas = (selectedTool: ShapeType) => {
   const debouncedSave = useCallback(
     debounce(async (shapesToSave: Shape[]) => {
       try {
+        setIsSaving(true);
         const sketchData = {
           id: 'current-sketch',
           name: 'Current Sketch',
@@ -74,8 +77,11 @@ export const useCanvas = (selectedTool: ShapeType) => {
           },
         };
         await localStorageClient.saveCurrentSketch(sketchData);
+        setHasUnsavedChanges(false);
+        setIsSaving(false);
       } catch (error) {
         console.error('Failed to save sketch:', error);
+        setIsSaving(false);
       }
     }, 1000),
     []
@@ -84,7 +90,11 @@ export const useCanvas = (selectedTool: ShapeType) => {
   // Save shapes when they change
   useEffect(() => {
     if (shapes.length > 0) {
+      setHasUnsavedChanges(true);
       debouncedSave(shapes);
+    } else {
+      setHasUnsavedChanges(false);
+      setIsSaving(false);
     }
   }, [shapes, debouncedSave]);
 
@@ -100,6 +110,7 @@ export const useCanvas = (selectedTool: ShapeType) => {
           position: mousePos,
           visible: true,
         });
+        // Prevent other mouse handling for text tool
         return;
       }
 
@@ -211,6 +222,7 @@ export const useCanvas = (selectedTool: ShapeType) => {
     textInput,
     canUndo,
     canRedo,
+    hasUnsavedChanges: hasUnsavedChanges || isSaving,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
