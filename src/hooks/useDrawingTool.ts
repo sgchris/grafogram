@@ -10,9 +10,9 @@ export const useDrawingTool = () => {
   // Handle keyboard shortcuts for tool selection
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      // Only handle number keys 1-7
+      // Handle number keys 1-5 for shapes
       const key = event.key;
-      if (key >= '1' && key <= '7') {
+      if (key >= '1' && key <= '5') {
         event.preventDefault();
         const toolMap: Record<string, ShapeType> = {
           '1': 'rectangle',
@@ -20,10 +20,17 @@ export const useDrawingTool = () => {
           '3': 'text',
           '4': 'line',
           '5': 'ellipse',
-          '6': 'eraser',
-          '7': 'move',
         };
         setSelectedTool(toolMap[key]);
+      }
+      // Handle letter keys for tools
+      else if (key.toLowerCase() === 'e') {
+        event.preventDefault();
+        setSelectedTool('eraser');
+      }
+      else if (key.toLowerCase() === 'm') {
+        event.preventDefault();
+        setSelectedTool('move');
       }
     };
 

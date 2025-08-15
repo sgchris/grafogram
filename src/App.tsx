@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TopBar, ConfirmationModal } from './components/UI';
-import { Toolbar } from './components/Toolbar';
+import { ShapesToolbar, ToolsToolbar } from './components/Toolbar';
 import { Canvas } from './components/Canvas';
 import { useDrawingTool, useCanvas } from './hooks';
 import './App.css';
@@ -53,7 +53,12 @@ const App: React.FC = () => {
       />
       
       <div className="main-content">
-        <Toolbar
+        <ShapesToolbar
+          selectedTool={selectedTool}
+          onToolSelect={selectTool}
+        />
+        
+        <ToolsToolbar
           selectedTool={selectedTool}
           onToolSelect={selectTool}
         />
