@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Point } from '../../types';
+import { Point, ShapeType } from '../../types';
 import './Canvas.css';
 
 interface CanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  selectedTool: ShapeType;
   onMouseDown: (event: React.MouseEvent<HTMLCanvasElement>) => void;
   onMouseMove: (event: React.MouseEvent<HTMLCanvasElement>) => void;
   onMouseUp: () => void;
@@ -13,19 +14,20 @@ interface CanvasProps {
 
 const Canvas: React.FC<CanvasProps> = ({
   canvasRef,
+  selectedTool,
   onMouseDown,
   onMouseMove,
   onMouseUp,
   textInput,
   onTextSubmit,
 }) => {
-  const [inputValue, setInputValue] = useState('');
-  const textInputRef = useRef<HTMLInputElement>(null);
+  const [textValue, setTextValue] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Focus text input when it becomes visible
+  // Focus textarea when text input becomes visible
   useEffect(() => {
-    if (textInput.visible && textInputRef.current) {
-      textInputRef.current.focus();
+    if (textInput.visible && textareaRef.current) {
+      textareaRef.current.focus();
     }
   }, [textInput.visible]);
 
@@ -45,29 +47,66 @@ const Canvas: React.FC<CanvasProps> = ({
     return () => window.removeEventListener('resize', updateCanvasSize);
   }, [canvasRef]);
 
-  const handleTextKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    event.stopPropagation(); // Prevent interference with other keyboard shortcuts
-    if (event.key === 'Enter') {
-      onTextSubmit(inputValue);
-      setInputValue('');
+  const handleTextKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    event.stopPropagation();
+    if (event.ctrlKey && event.key === 'Enter') {
+      event.preventDefault();
+      handleTextSubmit();
     } else if (event.key === 'Escape') {
-      onTextSubmit('');
-      setInputValue('');
+      event.preventDefault();
+      handleTextCancel();
     }
   };
 
-  const handleTextBlur = () => {
-    // Only submit if there's actual text content
-    if (inputValue.trim()) {
-      onTextSubmit(inputValue);
+  const handleTextSubmit = () => {
+    if (textValue.trim()) {
+      onTextSubmit(textValue);
     } else {
       onTextSubmit('');
     }
-    setInputValue('');
+    setTextValue('');
   };
 
+  const handleTextCancel = () => {
+    onTextSubmit('');
+    setTextValue('');
+  };
+
+  const handleTextBlur = () => {
+    handleTextSubmit();
+  };
+
+  // Calculate modal position to ensure it stays within viewport
+  const getModalPosition = (clickPosition: Point) => {
+    const modalWidth = 250;
+    const modalHeight = 80;
+    const viewport = {
+      width: window.innerWidth,
+      height: window.innerHeight
+    };
+
+    let left = clickPosition.x;
+    let top = clickPosition.y;
+
+    // Adjust if modal would go off-screen
+    if (left + modalWidth > viewport.width) {
+      left = viewport.width - modalWidth - 10;
+    }
+    if (top + modalHeight > viewport.height) {
+      top = viewport.height - modalHeight - 10;
+    }
+
+    // Ensure minimum distance from edges
+    left = Math.max(10, left);
+    top = Math.max(10, top);
+
+    return { left, top };
+  };
+
+  const modalPosition = textInput.visible ? getModalPosition(textInput.position) : { left: 0, top: 0 };
+
   return (
-    <div className="canvas-container">
+    <div className="canvas-container" data-tool={selectedTool}>
       <canvas
         ref={canvasRef}
         className="drawing-canvas"
@@ -78,23 +117,29 @@ const Canvas: React.FC<CanvasProps> = ({
       />
       
       {textInput.visible && (
-        <input
-          ref={textInputRef}
-          type="text"
-          className="text-input"
+        <div 
+          className="text-modal"
           style={{
             position: 'absolute',
-            left: Math.max(0, Math.min(textInput.position.x, window.innerWidth - 200)),
-            top: Math.max(0, Math.min(textInput.position.y, window.innerHeight - 100)),
+            left: modalPosition.left,
+            top: modalPosition.top,
             zIndex: 1000,
           }}
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleTextKeyDown}
-          onBlur={handleTextBlur}
-          placeholder="Enter text..."
-          autoFocus
-        />
+        >
+          <div className="text-modal-content">
+            <textarea
+              ref={textareaRef}
+              className="text-textarea"
+              value={textValue}
+              onChange={(e) => setTextValue(e.target.value)}
+              onKeyDown={handleTextKeyDown}
+              onBlur={handleTextBlur}
+              placeholder="Enter text... (Ctrl+Enter to confirm)"
+              rows={2}
+              autoFocus
+            />
+          </div>
+        </div>
       )}
     </div>
   );

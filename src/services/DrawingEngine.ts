@@ -121,11 +121,18 @@ export class DrawingEngine {
   }
 
   /**
-   * Draw text
+   * Draw text (supports multi-line)
    */
   private drawText(text: string, position: Point): void {
     this.ctx.font = '16px Arial';
     this.ctx.fillStyle = this.ctx.strokeStyle;
-    this.ctx.fillText(text, position.x, position.y);
+    this.ctx.textBaseline = 'top';
+    
+    const lines = text.split('\n');
+    const lineHeight = 20;
+    
+    lines.forEach((line, index) => {
+      this.ctx.fillText(line, position.x, position.y + (index * lineHeight));
+    });
   }
 }

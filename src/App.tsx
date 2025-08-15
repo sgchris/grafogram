@@ -41,6 +41,7 @@ const App: React.FC = () => {
         
         <Canvas
           canvasRef={canvasRef}
+          selectedTool={selectedTool}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
