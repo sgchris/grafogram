@@ -32,6 +32,7 @@ const App: React.FC = () => {
     canUndo,
     canRedo,
     hasUnsavedChanges,
+    isSaving,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
@@ -67,6 +68,7 @@ const App: React.FC = () => {
         canUndo={canUndo}
         canRedo={canRedo}
         hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isSaving}
       />
       
       <div className="main-content">

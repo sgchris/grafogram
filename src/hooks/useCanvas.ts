@@ -89,13 +89,15 @@ export const useCanvas = (selectedTool: ShapeType, initialShapes: Shape[] = [], 
 		}
 	}, [selectedTool]);
 
-	// Track unsaved changes
+	// Track unsaved changes (only for UI indication, not actual saving)
 	useEffect(() => {
 		if (shapes.length > 0) {
 			setHasUnsavedChanges(true);
 		} else {
 			setHasUnsavedChanges(false);
 		}
+		// Since we're using boards now, we don't need isSaving
+		setIsSaving(false);
 	}, [shapes]);
 
 	const handleMouseDown = useCallback(
@@ -338,7 +340,8 @@ export const useCanvas = (selectedTool: ShapeType, initialShapes: Shape[] = [], 
 		textInput,
 		canUndo,
 		canRedo,
-		hasUnsavedChanges: hasUnsavedChanges || isSaving,
+		hasUnsavedChanges,
+		isSaving,
 		handleMouseDown,
 		handleMouseMove,
 		handleMouseUp,

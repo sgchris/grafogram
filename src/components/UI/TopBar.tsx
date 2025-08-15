@@ -8,17 +8,18 @@ interface TopBarProps {
   canUndo: boolean;
   canRedo: boolean;
   hasUnsavedChanges: boolean;
+  isSaving?: boolean;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ onUndo, onRedo, onClear, canUndo, canRedo, hasUnsavedChanges }) => {
+const TopBar: React.FC<TopBarProps> = ({ onUndo, onRedo, onClear, canUndo, canRedo, hasUnsavedChanges, isSaving = false }) => {
   return (
     <div className="top-bar">
       <div className="app-title">
         <h1><u>G</u>rafogram - Online Sketch Board</h1>
-        {hasUnsavedChanges && (
+        {isSaving && (
           <div className="save-indicator">
             <span className="save-status">●</span>
-            <span className="save-text">Auto-saving...</span>
+            <span className="save-text">Saving...</span>
           </div>
         )}
       </div>
