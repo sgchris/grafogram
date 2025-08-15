@@ -195,3 +195,33 @@ export const isPointCollidingWithShape = (point: Point, shape: Shape): boolean =
       return false;
   }
 };
+
+/**
+ * Move a shape by the given offset
+ */
+export const moveShape = (shape: Shape, offsetX: number, offsetY: number): Shape => {
+  return {
+    ...shape,
+    startPoint: {
+      x: shape.startPoint.x + offsetX,
+      y: shape.startPoint.y + offsetY
+    },
+    endPoint: {
+      x: shape.endPoint.x + offsetX,
+      y: shape.endPoint.y + offsetY
+    }
+  };
+};
+
+/**
+ * Find the topmost shape at a given point (for selection priority)
+ */
+export const findShapeAtPoint = (point: Point, shapes: Shape[]): Shape | null => {
+  // Iterate from end to start (top to bottom in z-order)
+  for (let i = shapes.length - 1; i >= 0; i--) {
+    if (isPointCollidingWithShape(point, shapes[i])) {
+      return shapes[i];
+    }
+  }
+  return null;
+};

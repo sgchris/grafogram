@@ -7,6 +7,8 @@ import {
 	debounce,
 	getSnappedEndpoint,
 	isPointCollidingWithShape,
+	findShapeAtPoint,
+	moveShape,
 } from "../utils";
 import { localStorageClient } from "../services/storage";
 import { useHistory } from "./useHistory";
@@ -25,6 +27,9 @@ export const useCanvas = (selectedTool: ShapeType) => {
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [isErasing, setIsErasing] = useState(false);
+	const [isMoving, setIsMoving] = useState(false);
+	const [selectedShape, setSelectedShape] = useState<Shape | null>(null);
+	const [dragOffset, setDragOffset] = useState<Point>({ x: 0, y: 0 });
 	const [textInput, setTextInput] = useState<{
 		position: Point;
 		visible: boolean;
@@ -147,6 +152,22 @@ export const useCanvas = (selectedTool: ShapeType) => {
 				return;
 			}
 
+			if (selectedTool === "move") {
+				// Find the shape to move
+				const shapeToMove = findShapeAtPoint(mousePos, shapes);
+				if (shapeToMove) {
+					setIsMoving(true);
+					setSelectedShape(shapeToMove);
+					// Calculate offset from mouse to shape's start point
+					setDragOffset({
+						x: mousePos.x - shapeToMove.startPoint.x,
+						y: mousePos.y - shapeToMove.startPoint.y
+					});
+					pushToHistory(shapes);
+				}
+				return;
+			}
+
 			setIsDrawing(true);
 			const newShape: Shape = {
 				id: generateId(),
@@ -184,18 +205,50 @@ export const useCanvas = (selectedTool: ShapeType) => {
 				return;
 			}
 
+			// Handle move drag
+			if (isMoving && selectedShape && selectedTool === "move") {
+				// Calculate new position based on mouse position and drag offset
+				const newStartPoint = {
+					x: mousePos.x - dragOffset.x,
+					y: mousePos.y - dragOffset.y
+				};
+				
+				// Calculate the offset from the original position
+				const offsetX = newStartPoint.x - selectedShape.startPoint.x;
+				const offsetY = newStartPoint.y - selectedShape.startPoint.y;
+				
+				// Update the shape position
+				const movedShape = moveShape(selectedShape, offsetX, offsetY);
+				
+				// Update shapes array with the moved shape
+				setShapes(prev => prev.map(shape => 
+					shape.id === selectedShape.id ? movedShape : shape
+				));
+				
+				// Update selectedShape to the new position
+				setSelectedShape(movedShape);
+				return;
+			}
+
 			if (!isDrawing || !currentShape) return;
 
 			setCurrentShape((prev) =>
 				prev ? { ...prev, endPoint: mousePos } : null
 			);
 		},
-		[isDrawing, currentShape, isErasing, selectedTool, shapes]
+		[isDrawing, currentShape, isErasing, selectedTool, shapes, isMoving, selectedShape, dragOffset]
 	);
 
 	const handleMouseUp = useCallback(() => {
 		if (isErasing) {
 			setIsErasing(false);
+			return;
+		}
+
+		if (isMoving) {
+			setIsMoving(false);
+			setSelectedShape(null);
+			setDragOffset({ x: 0, y: 0 });
 			return;
 		}
 
@@ -217,7 +270,7 @@ export const useCanvas = (selectedTool: ShapeType) => {
 		pushToHistory(shapes);
 		setShapes((prev) => [...prev, finalShape]);
 		setCurrentShape(null);
-	}, [isDrawing, currentShape, shapes, pushToHistory, isErasing]);
+	}, [isDrawing, currentShape, shapes, pushToHistory, isErasing, isMoving]);
 
 	const handleTextSubmit = useCallback(
 		(text: string) => {
@@ -301,5 +354,6 @@ export const useCanvas = (selectedTool: ShapeType) => {
 		handleUndo,
 		handleRedo,
 		clearCanvas,
+		selectedShape,
 	};
 };

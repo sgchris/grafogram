@@ -14,6 +14,7 @@ const tools: { type: ShapeType; icon: string; label: string; key: string }[] = [
   { type: 'line', icon: '📏', label: 'Line', key: '4' },
   { type: 'ellipse', icon: '⭕', label: 'Ellipse', key: '5' },
   { type: 'eraser', icon: '🧽', label: 'Eraser', key: '6' },
+  { type: 'move', icon: '✋', label: 'Move', key: '7' },
 ];
 
 const Toolbar: React.FC<ToolbarProps> = ({ selectedTool, onToolSelect }) => {

@@ -63,6 +63,10 @@
   cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTcgMTdIMTcuNUwxMyAxMkg3VjE3WiIgZmlsbD0iIzMzMzMzMyIvPgo8cGF0aCBkPSJNMTMgMTJMMTcuNSAxN0gxOUwxNS41IDEySDEzWiIgZmlsbD0iIzk5OTk5OSIvPgo8cGF0aCBkPSJNNyAxN0g5VjE5SDdWMTdaIiBmaWxsPSIjNjY2NjY2Ii8+CjxwYXRoIGQ9Ik05IDEySDE1LjVMMTMgMTRIOVYxMloiIGZpbGw9IiNFRkVGRUYiLz4KPC9zdmc+') 12 12, auto;
 }
 
+.canvas-container[data-tool="move"] .drawing-canvas {
+  cursor: move;
+}
+
 /* Text Modal Styles */
 .text-modal {
   background: white;
