@@ -1,13 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { TopBar, ConfirmationModal } from './components/UI';
 import { ShapesToolbar, ToolsToolbar } from './components/Toolbar';
+import { BoardsPanel } from './components/BoardsPanel';
 import { Canvas } from './components/Canvas';
-import { useDrawingTool, useCanvas } from './hooks';
+import { useDrawingTool, useCanvas, useBoards } from './hooks';
 import './App.css';
 
 const App: React.FC = () => {
   const { selectedTool, selectTool } = useDrawingTool();
   const [showClearModal, setShowClearModal] = useState(false);
+  
+  const {
+    boards,
+    activeBoard,
+    createBoard,
+    selectBoard,
+    renameBoard,
+    deleteBoard,
+    updateBoardShapes,
+  } = useBoards();
+
+  const handleBoardShapesChange = useCallback((shapes: any[]) => {
+    if (activeBoard) {
+      updateBoardShapes(activeBoard.id, shapes);
+    }
+  }, [activeBoard?.id, updateBoardShapes]); // Use only the ID instead of the whole object
   
   const {
     canvasRef,
@@ -24,7 +41,7 @@ const App: React.FC = () => {
     clearCanvas,
     hoveredShape,
     selectedShape,
-  } = useCanvas(selectedTool);
+  } = useCanvas(selectedTool, activeBoard?.shapes || [], handleBoardShapesChange);
 
   const isMoving = selectedTool === 'move' && selectedShape !== null;
 
@@ -61,6 +78,15 @@ const App: React.FC = () => {
         <ToolsToolbar
           selectedTool={selectedTool}
           onToolSelect={selectTool}
+        />
+        
+        <BoardsPanel
+          boards={boards}
+          activeBoard={activeBoard}
+          onBoardSelect={selectBoard}
+          onBoardRename={renameBoard}
+          onBoardDelete={deleteBoard}
+          onBoardCreate={createBoard}
         />
         
         <Canvas

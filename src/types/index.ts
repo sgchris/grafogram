@@ -20,6 +20,14 @@ export interface Shape {
   text?: string; // for text shapes
 }
 
+export interface Board {
+  id: string;
+  name: string;
+  shapes: Shape[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface SketchData {
   id: string;
   name: string;

@@ -11,6 +11,7 @@
   flex: 1;
   position: relative;
   display: flex;
+  padding-right: 290px; /* Space for boards panel (250px width + 40px margin) */
 }
 
 /* Global styles */
@@ -49,5 +50,6 @@ input, textarea {
 @media (max-width: 768px) {
   .main-content {
     flex-direction: column;
+    padding-right: 0; /* Remove right padding on mobile */
   }
 }

@@ -16,9 +16,10 @@ import { useHistory } from "./useHistory";
 /**
  * Custom hook for managing canvas state and drawing operations
  */
-export const useCanvas = (selectedTool: ShapeType) => {
+export const useCanvas = (selectedTool: ShapeType, initialShapes: Shape[] = [], onShapesChange?: (shapes: Shape[]) => void) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
-	const [shapes, setShapes] = useState<Shape[]>([]);
+	const onShapesChangeRef = useRef(onShapesChange);
+	const [shapes, setShapes] = useState<Shape[]>(initialShapes);
 	const [isDrawing, setIsDrawing] = useState(false);
 	const [currentShape, setCurrentShape] = useState<Shape | null>(null);
 	const [drawingEngine, setDrawingEngine] = useState<DrawingEngine | null>(
@@ -53,21 +54,23 @@ export const useCanvas = (selectedTool: ShapeType) => {
 		}
 	}, []);
 
-	// Load saved sketch on mount
+	// Keep the onShapesChange ref up to date
 	useEffect(() => {
-		const loadSavedSketch = async () => {
-			try {
-				const savedSketch = await localStorageClient.getCurrentSketch();
-				if (savedSketch && savedSketch.shapes) {
-					setShapes(savedSketch.shapes);
-				}
-			} catch (error) {
-				console.error("Failed to load saved sketch:", error);
-			}
-		};
+		onShapesChangeRef.current = onShapesChange;
+	}, [onShapesChange]);
 
-		loadSavedSketch();
-	}, []);
+	// Update shapes when initialShapes changes (board switch)
+	useEffect(() => {
+		setShapes(initialShapes);
+		clearHistory(); // Clear history when switching boards
+	}, [initialShapes, clearHistory]);
+
+	// Call onShapesChange when shapes are updated (using ref to avoid infinite loop)
+	useEffect(() => {
+		if (onShapesChangeRef.current) {
+			onShapesChangeRef.current(shapes);
+		}
+	}, [shapes]);
 
 	// Redraw canvas when shapes change
 	useEffect(() => {
@@ -86,43 +89,14 @@ export const useCanvas = (selectedTool: ShapeType) => {
 		}
 	}, [selectedTool]);
 
-	// Debounced save function
-	const debouncedSave = useCallback(
-		debounce(async (shapesToSave: Shape[]) => {
-			try {
-				setIsSaving(true);
-				const sketchData = {
-					id: "current-sketch",
-					name: "Current Sketch",
-					shapes: shapesToSave,
-					createdAt: new Date(),
-					updatedAt: new Date(),
-					canvasSize: {
-						width: canvasRef.current?.width || 800,
-						height: canvasRef.current?.height || 600,
-					},
-				};
-				await localStorageClient.saveCurrentSketch(sketchData);
-				setHasUnsavedChanges(false);
-				setIsSaving(false);
-			} catch (error) {
-				console.error("Failed to save sketch:", error);
-				setIsSaving(false);
-			}
-		}, 500),
-		[]
-	);
-
-	// Save shapes when they change
+	// Track unsaved changes
 	useEffect(() => {
 		if (shapes.length > 0) {
 			setHasUnsavedChanges(true);
-			debouncedSave(shapes);
 		} else {
 			setHasUnsavedChanges(false);
-			setIsSaving(false);
 		}
-	}, [shapes, debouncedSave]);
+	}, [shapes]);
 
 	const handleMouseDown = useCallback(
 		(event: React.MouseEvent<HTMLCanvasElement>) => {
