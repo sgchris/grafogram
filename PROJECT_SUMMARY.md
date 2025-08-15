@@ -21,11 +21,11 @@
 
 ### Keyboard Controls
 - **Tool Selection**: Numbers 1-5 for quick tool switching
-  - `1` - Line
+  - `1` - Rectangle
   - `2` - Arrow  
-  - `3` - Rectangle
-  - `4` - Circle
-  - `5` - Text
+  - `3` - Text
+  - `4` - Line
+  - `5` - Circle
 - **Undo/Redo**: Ctrl+Z and Ctrl+Y shortcuts
 
 ### Undo/Redo System

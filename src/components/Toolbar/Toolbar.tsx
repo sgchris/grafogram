@@ -8,11 +8,11 @@ interface ToolbarProps {
 }
 
 const tools: { type: ShapeType; icon: string; label: string; key: string }[] = [
-  { type: 'line', icon: '📏', label: 'Line', key: '1' },
-  { type: 'arrow', icon: '➡️', label: 'Arrow', key: '2' },
-  { type: 'rectangle', icon: '▭', label: 'Rectangle', key: '3' },
-  { type: 'circle', icon: '○', label: 'Circle', key: '4' },
-  { type: 'text', icon: 'T', label: 'Text', key: '5' },
+    { type: 'rectangle', icon: '▭', label: 'Rectangle', key: '1' },
+    { type: 'arrow', icon: '➡️', label: 'Arrow', key: '2' },
+    { type: 'text', icon: 'T', label: 'Text', key: '3' },
+  { type: 'line', icon: '📏', label: 'Line', key: '4' },
+  { type: 'circle', icon: '○', label: 'Circle', key: '5' },
 ];
 
 const Toolbar: React.FC<ToolbarProps> = ({ selectedTool, onToolSelect }) => {

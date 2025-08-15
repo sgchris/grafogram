@@ -15,11 +15,11 @@ export const useDrawingTool = () => {
       if (key >= '1' && key <= '5') {
         event.preventDefault();
         const toolMap: Record<string, ShapeType> = {
-          '1': 'line',
+          '1': 'rectangle',
           '2': 'arrow',
-          '3': 'rectangle',
-          '4': 'circle',
-          '5': 'text',
+          '3': 'text',
+          '4': 'line',
+          '5': 'circle',
         };
         setSelectedTool(toolMap[key]);
       }
