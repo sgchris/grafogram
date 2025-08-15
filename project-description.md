@@ -28,5 +28,3 @@ All the shapes are created by pressing and holding LMB, when it's moved the shap
 - The project is created with ReactJS with the most common and modern methodologies, tools and patterns.
 - Initiate the current folder with GIT. Add the relevant ".gitignore" file.
 
-
-Please use React library for 

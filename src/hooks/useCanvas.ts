@@ -106,10 +106,13 @@ export const useCanvas = (selectedTool: ShapeType) => {
       const mousePos = getMousePos(canvas, event.nativeEvent);
 
       if (selectedTool === 'text') {
-        setTextInput({
-          position: mousePos,
-          visible: true,
-        });
+        setTimeout(() => {
+          setTextInput({
+            position: mousePos,
+            visible: true,
+          });
+        }, 50);
+
         // Prevent other mouse handling for text tool
         return;
       }
