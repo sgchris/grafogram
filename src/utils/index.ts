@@ -1,3 +1,5 @@
+import { Point } from '../types';
+
 /**
  * Generate a unique ID for shapes and sketches
  */
@@ -49,4 +51,37 @@ export const debounce = <T extends (...args: any[]) => any>(
  */
 export const clamp = (value: number, min: number, max: number): number => {
   return Math.min(Math.max(value, min), max);
+};
+
+/**
+ * Snap angle to nearest round number (in degrees)
+ * Snaps to nearest 5-degree increment for better line alignment
+ */
+export const snapAngle = (angleRad: number): number => {
+  // Convert radians to degrees
+  let degrees = (angleRad * 180) / Math.PI;
+  
+  // Normalize to 0-360 range
+  degrees = ((degrees % 360) + 360) % 360;
+  
+  // Snap to nearest 5-degree increment
+  const snapIncrement = 5;
+  const snappedDegrees = Math.round(degrees / snapIncrement) * snapIncrement;
+  
+  // Convert back to radians
+  return (snappedDegrees * Math.PI) / 180;
+};
+
+/**
+ * Calculate new endpoint based on snapped angle and original distance
+ */
+export const getSnappedEndpoint = (start: Point, end: Point): Point => {
+  const originalAngle = angle(start.x, start.y, end.x, end.y);
+  const originalDistance = distance(start.x, start.y, end.x, end.y);
+  const snappedAngle = snapAngle(originalAngle);
+  
+  return {
+    x: start.x + originalDistance * Math.cos(snappedAngle),
+    y: start.y + originalDistance * Math.sin(snappedAngle)
+  };
 };

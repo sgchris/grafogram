@@ -94,14 +94,38 @@ export class DrawingEngine {
   }
 
   /**
-   * Draw a rectangle
+   * Draw a rectangle with rounded corners
    */
   private drawRectangle(start: Point, end: Point): void {
     const width = end.x - start.x;
     const height = end.y - start.y;
+    const cornerRadius = 8; // Subtle rounded corners
     
     this.ctx.beginPath();
-    this.ctx.rect(start.x, start.y, width, height);
+    
+    // Use roundRect if available (modern browsers), fallback to manual drawing
+    if (this.ctx.roundRect) {
+      this.ctx.roundRect(start.x, start.y, width, height, cornerRadius);
+    } else {
+      // Manual rounded rectangle for older browsers
+      const x = start.x;
+      const y = start.y;
+      const w = width;
+      const h = height;
+      const r = Math.min(cornerRadius, Math.abs(w) / 2, Math.abs(h) / 2);
+      
+      this.ctx.moveTo(x + r, y);
+      this.ctx.lineTo(x + w - r, y);
+      this.ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      this.ctx.lineTo(x + w, y + h - r);
+      this.ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      this.ctx.lineTo(x + r, y + h);
+      this.ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      this.ctx.lineTo(x, y + r);
+      this.ctx.quadraticCurveTo(x, y, x + r, y);
+      this.ctx.closePath();
+    }
+    
     this.ctx.stroke();
   }
 

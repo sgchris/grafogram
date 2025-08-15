@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Shape, Point, ShapeType } from '../types';
 import { DrawingEngine } from '../services/DrawingEngine';
-import { generateId, getMousePos, debounce } from '../utils';
+import { generateId, getMousePos, debounce, getSnappedEndpoint } from '../utils';
 import { localStorageClient } from '../services/storage';
 import { useHistory } from './useHistory';
 
@@ -114,7 +114,7 @@ export const useCanvas = (selectedTool: ShapeType) => {
             });
             }, 50);
         }
-        
+
         // Prevent other mouse handling for text tool
         return;
       }
@@ -152,8 +152,17 @@ export const useCanvas = (selectedTool: ShapeType) => {
     if (!isDrawing || !currentShape) return;
 
     setIsDrawing(false);
+    
+    let finalShape = { ...currentShape };
+    
+    // Apply angle snapping for lines and arrows
+    if (currentShape.type === 'line' || currentShape.type === 'arrow') {
+      const snappedEndpoint = getSnappedEndpoint(currentShape.startPoint, currentShape.endPoint);
+      finalShape.endPoint = snappedEndpoint;
+    }
+    
     pushToHistory(shapes);
-    setShapes(prev => [...prev, currentShape]);
+    setShapes(prev => [...prev, finalShape]);
     setCurrentShape(null);
   }, [isDrawing, currentShape, shapes, pushToHistory]);
 
