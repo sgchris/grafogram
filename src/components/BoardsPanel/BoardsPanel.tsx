@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Board } from '../../types';
+import { ConfirmationModal } from '../UI';
 import './BoardsPanel.css';
 
 interface BoardsPanelProps {
@@ -21,6 +22,7 @@ const BoardsPanel: React.FC<BoardsPanelProps> = ({
 }) => {
   const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [boardToDelete, setBoardToDelete] = useState<Board | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
 
   // Focus input when editing starts
@@ -64,11 +66,22 @@ const BoardsPanel: React.FC<BoardsPanelProps> = ({
     }
   };
 
-  const handleDeleteClick = (e: React.MouseEvent, boardId: string) => {
+  const handleDeleteClick = (e: React.MouseEvent, board: Board) => {
     e.stopPropagation();
     if (boards.length > 1) {
-      onBoardDelete(boardId);
+      setBoardToDelete(board);
     }
+  };
+
+  const handleConfirmDelete = () => {
+    if (boardToDelete) {
+      onBoardDelete(boardToDelete.id);
+      setBoardToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setBoardToDelete(null);
   };
 
   return (
@@ -112,7 +125,7 @@ const BoardsPanel: React.FC<BoardsPanelProps> = ({
               {boards.length > 1 && (
                 <button
                   className="delete-board-btn"
-                  onClick={(e) => handleDeleteClick(e, board.id)}
+                  onClick={(e) => handleDeleteClick(e, board)}
                   title="Delete board"
                 >
                   🗑️
@@ -128,6 +141,17 @@ const BoardsPanel: React.FC<BoardsPanelProps> = ({
           </div>
         ))}
       </div>
+
+      {boardToDelete && (
+        <ConfirmationModal
+          title="Delete Board"
+          message={`Are you sure you want to delete "${boardToDelete.name}"? This action cannot be undone and all drawings on this board will be lost.`}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+          confirmText="Delete"
+          cancelText="Cancel"
+        />
+      )}
     </div>
   );
 };

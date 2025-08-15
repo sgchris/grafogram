@@ -10,6 +10,18 @@ export const useDrawingTool = () => {
   // Handle keyboard shortcuts for tool selection
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
+      // Don't trigger shortcuts if user is typing in an input field
+      const target = event.target as HTMLElement;
+      if (target && (
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.contentEditable === 'true' ||
+        target.closest('input') ||
+        target.closest('textarea')
+      )) {
+        return; // Exit early if typing in input field
+      }
+
       // Handle number keys 1-5 for shapes
       const key = event.key;
       if (key >= '1' && key <= '5') {
