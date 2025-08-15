@@ -6,6 +6,7 @@ import {
 	getMousePos,
 	debounce,
 	getSnappedEndpoint,
+	isPointCollidingWithShape,
 } from "../utils";
 import { localStorageClient } from "../services/storage";
 import { useHistory } from "./useHistory";
@@ -23,6 +24,7 @@ export const useCanvas = (selectedTool: ShapeType) => {
 	);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
+	const [isErasing, setIsErasing] = useState(false);
 	const [textInput, setTextInput] = useState<{
 		position: Point;
 		visible: boolean;
@@ -129,6 +131,22 @@ export const useCanvas = (selectedTool: ShapeType) => {
 				return;
 			}
 
+			if (selectedTool === "eraser") {
+				setIsErasing(true);
+				// Find and delete shapes under cursor
+				const shapesToDelete = shapes.filter(shape => 
+					isPointCollidingWithShape(mousePos, shape)
+				);
+				
+				if (shapesToDelete.length > 0) {
+					pushToHistory(shapes);
+					setShapes(prev => prev.filter(shape => 
+						!shapesToDelete.some(toDelete => toDelete.id === shape.id)
+					));
+				}
+				return;
+			}
+
 			setIsDrawing(true);
 			const newShape: Shape = {
 				id: generateId(),
@@ -142,25 +160,45 @@ export const useCanvas = (selectedTool: ShapeType) => {
 			};
 			setCurrentShape(newShape);
 		},
-		[selectedTool]
+		[selectedTool, shapes, pushToHistory]
 	);
 
 	const handleMouseMove = useCallback(
 		(event: React.MouseEvent<HTMLCanvasElement>) => {
-			if (!isDrawing || !currentShape) return;
-
 			const canvas = canvasRef.current;
 			if (!canvas) return;
 
 			const mousePos = getMousePos(canvas, event.nativeEvent);
+			
+			// Handle eraser drag
+			if (isErasing && selectedTool === "eraser") {
+				const shapesToDelete = shapes.filter(shape => 
+					isPointCollidingWithShape(mousePos, shape)
+				);
+				
+				if (shapesToDelete.length > 0) {
+					setShapes(prev => prev.filter(shape => 
+						!shapesToDelete.some(toDelete => toDelete.id === shape.id)
+					));
+				}
+				return;
+			}
+
+			if (!isDrawing || !currentShape) return;
+
 			setCurrentShape((prev) =>
 				prev ? { ...prev, endPoint: mousePos } : null
 			);
 		},
-		[isDrawing, currentShape]
+		[isDrawing, currentShape, isErasing, selectedTool, shapes]
 	);
 
 	const handleMouseUp = useCallback(() => {
+		if (isErasing) {
+			setIsErasing(false);
+			return;
+		}
+
 		if (!isDrawing || !currentShape) return;
 
 		setIsDrawing(false);
@@ -179,7 +217,7 @@ export const useCanvas = (selectedTool: ShapeType) => {
 		pushToHistory(shapes);
 		setShapes((prev) => [...prev, finalShape]);
 		setCurrentShape(null);
-	}, [isDrawing, currentShape, shapes, pushToHistory]);
+	}, [isDrawing, currentShape, shapes, pushToHistory, isErasing]);
 
 	const handleTextSubmit = useCallback(
 		(text: string) => {

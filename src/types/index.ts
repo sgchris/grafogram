@@ -9,7 +9,7 @@ export interface ShapeStyle {
   fillColor?: string;
 }
 
-export type ShapeType = 'rectangle' | 'arrow' | 'text' | 'line' | 'circle';
+export type ShapeType = 'rectangle' | 'arrow' | 'text' | 'line' | 'circle' | 'eraser';
 
 export interface Shape {
   id: string;

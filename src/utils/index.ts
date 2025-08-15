@@ -1,4 +1,5 @@
 import { Point } from '../types';
+import type { Shape } from '../types';
 
 /**
  * Generate a unique ID for shapes and sketches
@@ -84,4 +85,104 @@ export const getSnappedEndpoint = (start: Point, end: Point): Point => {
     x: start.x + originalDistance * Math.cos(snappedAngle),
     y: start.y + originalDistance * Math.sin(snappedAngle)
   };
+};
+
+/**
+ * Check if a point is near a line segment within a tolerance
+ */
+export const isPointNearLine = (point: Point, lineStart: Point, lineEnd: Point, tolerance: number = 5): boolean => {
+  const A = point.x - lineStart.x;
+  const B = point.y - lineStart.y;
+  const C = lineEnd.x - lineStart.x;
+  const D = lineEnd.y - lineStart.y;
+
+  const dot = A * C + B * D;
+  const lenSq = C * C + D * D;
+  
+  if (lenSq === 0) return distance(point.x, point.y, lineStart.x, lineStart.y) <= tolerance;
+  
+  let param = dot / lenSq;
+  param = Math.max(0, Math.min(1, param));
+  
+  const closestX = lineStart.x + param * C;
+  const closestY = lineStart.y + param * D;
+  
+  return distance(point.x, point.y, closestX, closestY) <= tolerance;
+};
+
+/**
+ * Check if a point is inside a rectangle
+ */
+export const isPointInRectangle = (point: Point, rectStart: Point, rectEnd: Point, tolerance: number = 5): boolean => {
+  const minX = Math.min(rectStart.x, rectEnd.x) - tolerance;
+  const maxX = Math.max(rectStart.x, rectEnd.x) + tolerance;
+  const minY = Math.min(rectStart.y, rectEnd.y) - tolerance;
+  const maxY = Math.max(rectStart.y, rectEnd.y) + tolerance;
+  
+  // Check if point is on the border (within tolerance of any edge)
+  const onLeftEdge = Math.abs(point.x - minX) <= tolerance && point.y >= minY && point.y <= maxY;
+  const onRightEdge = Math.abs(point.x - maxX) <= tolerance && point.y >= minY && point.y <= maxY;
+  const onTopEdge = Math.abs(point.y - minY) <= tolerance && point.x >= minX && point.x <= maxX;
+  const onBottomEdge = Math.abs(point.y - maxY) <= tolerance && point.x >= minX && point.x <= maxX;
+  
+  return onLeftEdge || onRightEdge || onTopEdge || onBottomEdge;
+};
+
+/**
+ * Check if a point is near a circle's circumference
+ */
+export const isPointNearCircle = (point: Point, circleStart: Point, circleEnd: Point, tolerance: number = 5): boolean => {
+  const centerX = (circleStart.x + circleEnd.x) / 2;
+  const centerY = (circleStart.y + circleEnd.y) / 2;
+  const radius = Math.sqrt(
+    Math.pow(circleEnd.x - circleStart.x, 2) + Math.pow(circleEnd.y - circleStart.y, 2)
+  ) / 2;
+  
+  const distFromCenter = distance(point.x, point.y, centerX, centerY);
+  return Math.abs(distFromCenter - radius) <= tolerance;
+};
+
+/**
+ * Check if a point is near text (simple bounding box check)
+ */
+export const isPointNearText = (point: Point, textPosition: Point, text: string, tolerance: number = 10): boolean => {
+  if (!text) return false;
+  
+  // Rough text dimensions - could be improved with actual text measurement
+  const lines = text.split('\n');
+  const lineHeight = 20;
+  const charWidth = 8; // approximate character width
+  const maxLineLength = Math.max(...lines.map(line => line.length));
+  
+  const textWidth = maxLineLength * charWidth;
+  const textHeight = lines.length * lineHeight;
+  
+  return point.x >= textPosition.x - tolerance &&
+         point.x <= textPosition.x + textWidth + tolerance &&
+         point.y >= textPosition.y - tolerance &&
+         point.y <= textPosition.y + textHeight + tolerance;
+};
+
+/**
+ * Check if a point collides with a shape
+ */
+export const isPointCollidingWithShape = (point: Point, shape: Shape): boolean => {
+  switch (shape.type) {
+    case 'line':
+      return isPointNearLine(point, shape.startPoint, shape.endPoint);
+    case 'arrow':
+      // Check both the main line and arrow head
+      if (isPointNearLine(point, shape.startPoint, shape.endPoint)) return true;
+      
+      // Check arrow head (simplified - just the end point area)
+      return distance(point.x, point.y, shape.endPoint.x, shape.endPoint.y) <= 15;
+    case 'rectangle':
+      return isPointInRectangle(point, shape.startPoint, shape.endPoint);
+    case 'circle':
+      return isPointNearCircle(point, shape.startPoint, shape.endPoint);
+    case 'text':
+      return isPointNearText(point, shape.startPoint, shape.text || '');
+    default:
+      return false;
+  }
 };

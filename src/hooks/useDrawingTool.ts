@@ -10,9 +10,9 @@ export const useDrawingTool = () => {
   // Handle keyboard shortcuts for tool selection
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      // Only handle number keys 1-5
+      // Only handle number keys 1-6
       const key = event.key;
-      if (key >= '1' && key <= '5') {
+      if (key >= '1' && key <= '6') {
         event.preventDefault();
         const toolMap: Record<string, ShapeType> = {
           '1': 'rectangle',
@@ -20,6 +20,7 @@ export const useDrawingTool = () => {
           '3': 'text',
           '4': 'line',
           '5': 'circle',
+          '6': 'eraser',
         };
         setSelectedTool(toolMap[key]);
       }
