@@ -94,7 +94,7 @@ export const useCanvas = (selectedTool: ShapeType) => {
 				console.error("Failed to save sketch:", error);
 				setIsSaving(false);
 			}
-		}, 1000),
+		}, 500),
 		[]
 	);
 

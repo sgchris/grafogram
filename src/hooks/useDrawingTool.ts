@@ -5,7 +5,7 @@ import { ShapeType } from '../types';
  * Custom hook for managing drawing tool selection
  */
 export const useDrawingTool = () => {
-  const [selectedTool, setSelectedTool] = useState<ShapeType>('line');
+  const [selectedTool, setSelectedTool] = useState<ShapeType>('rectangle');
 
   // Handle keyboard shortcuts for tool selection
   useEffect(() => {
