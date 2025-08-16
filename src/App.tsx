@@ -42,9 +42,8 @@ const App: React.FC = () => {
     clearCanvas,
     hoveredShape,
     selectedShape,
+    isMoving,
   } = useCanvas(selectedTool, activeBoard?.shapes || [], handleBoardShapesChange);
-
-  const isMoving = selectedTool === 'move' && selectedShape !== null;
 
   const handleClearCanvas = () => {
     setShowClearModal(true);

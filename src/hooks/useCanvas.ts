@@ -108,6 +108,11 @@ export const useCanvas = (selectedTool: ShapeType, initialShapes: Shape[] = [], 
 			const mousePos = getMousePos(canvas, event.nativeEvent);
 
 			if (selectedTool === "text") {
+                // Close any existing text input first
+                if (textInput.visible) {
+                    setTextInput({ position: { x: 0, y: 0 }, visible: false });
+                    return;
+                }
                 
                 event.stopPropagation();
                 event.preventDefault();
@@ -268,6 +273,7 @@ export const useCanvas = (selectedTool: ShapeType, initialShapes: Shape[] = [], 
 
 	const handleTextSubmit = useCallback(
 		(text: string) => {
+			// Only create text shape if there's actual content
 			if (text.trim()) {
 				const textShape: Shape = {
 					id: generateId(),
@@ -285,7 +291,7 @@ export const useCanvas = (selectedTool: ShapeType, initialShapes: Shape[] = [], 
 				setShapes((prev) => [...prev, textShape]);
 			}
 
-			// close the window with delay\
+			// Always close the text input modal
 			setTextInput({ position: { x: 0, y: 0 }, visible: false });
 		},
 		[textInput.position, shapes, pushToHistory]
@@ -351,5 +357,6 @@ export const useCanvas = (selectedTool: ShapeType, initialShapes: Shape[] = [], 
 		clearCanvas,
 		selectedShape,
 		hoveredShape,
+		isMoving,
 	};
 };
