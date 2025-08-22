@@ -18,6 +18,8 @@ const App: React.FC = () => {
     renameBoard,
     deleteBoard,
     updateBoardShapes,
+    exportCurrentBoard,
+    importBoard,
   } = useBoards();
 
   const handleBoardShapesChange = useCallback((shapes: any[]) => {
@@ -25,6 +27,24 @@ const App: React.FC = () => {
       updateBoardShapes(activeBoard.id, shapes);
     }
   }, [activeBoard?.id, updateBoardShapes]); // Use only the ID instead of the whole object
+
+  const handleImport = async () => {
+    try {
+      await importBoard();
+    } catch (error) {
+      console.error('Import failed:', error);
+      alert('Failed to import file. Please check the file format and try again.');
+    }
+  };
+
+  const handleExport = () => {
+    try {
+      exportCurrentBoard();
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Failed to export board. Please try again.');
+    }
+  };
   
   const {
     canvasRef,
@@ -61,11 +81,9 @@ const App: React.FC = () => {
   return (
     <div className="app">
       <TopBar
-        onUndo={handleUndo}
-        onRedo={handleRedo}
+        onImport={handleImport}
+        onExport={handleExport}
         onClear={handleClearCanvas}
-        canUndo={canUndo}
-        canRedo={canRedo}
         hasUnsavedChanges={hasUnsavedChanges}
         isSaving={isSaving}
       />

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Board, Shape } from '../types';
 import { generateId } from '../utils';
+import { GrafogramFileService } from '../services/GrafogramFileService';
 
 const BOARDS_STORAGE_KEY = 'sketch-boards';
 const ACTIVE_BOARD_STORAGE_KEY = 'sketch-active-board-id';
@@ -137,6 +138,89 @@ export const useBoards = () => {
     ));
   }, []);
 
+  const findBoardByName = useCallback((name: string): Board | undefined => {
+    return boards.find(board => board.name === name);
+  }, [boards]);
+
+  const createBoardWithShapes = useCallback((name: string, shapes: Shape[]): Board => {
+    const newBoard: Board = {
+      id: generateId(),
+      name: name,
+      shapes: shapes,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    
+    setBoards(prev => [...prev, newBoard]);
+    setActiveBoard(newBoard);
+    return newBoard;
+  }, []);
+
+  const overrideBoardShapes = useCallback((boardId: string, shapes: Shape[]) => {
+    setBoards(prev => prev.map(board => 
+      board.id === boardId 
+        ? { ...board, shapes, updatedAt: new Date() }
+        : board
+    ));
+    
+    // Update active board if it's the one being overridden
+    if (activeBoard?.id === boardId) {
+      setActiveBoard(prev => prev ? { ...prev, shapes, updatedAt: new Date() } : null);
+    }
+  }, [activeBoard]);
+
+  const exportCurrentBoard = useCallback(() => {
+    if (!activeBoard) {
+      throw new Error('No active board to export');
+    }
+    
+    // Get canvas size from DOM
+    const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+    const canvasWidth = canvas?.width || 800;
+    const canvasHeight = canvas?.height || 600;
+    
+    GrafogramFileService.exportToFile(activeBoard, canvasWidth, canvasHeight);
+  }, [activeBoard]);
+
+  const importBoard = useCallback(async (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      
+      input.onchange = async (event) => {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (!file) {
+          reject(new Error('No file selected'));
+          return;
+        }
+
+        try {
+          const importedBoard = await GrafogramFileService.importFromFile(file);
+          
+          // Check if board with same name exists
+          const existingBoard = findBoardByName(importedBoard.name);
+          
+          if (existingBoard) {
+            // Override existing board's shapes
+            overrideBoardShapes(existingBoard.id, importedBoard.shapes);
+            setActiveBoard(existingBoard);
+          } else {
+            // Create new board
+            const newBoard = createBoardWithShapes(importedBoard.name, importedBoard.shapes);
+            setActiveBoard(newBoard);
+          }
+          
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      input.click();
+    });
+  }, [findBoardByName, overrideBoardShapes, createBoardWithShapes]);
+
   return {
     boards,
     activeBoard,
@@ -145,5 +229,10 @@ export const useBoards = () => {
     renameBoard,
     deleteBoard,
     updateBoardShapes,
+    findBoardByName,
+    createBoardWithShapes,
+    overrideBoardShapes,
+    exportCurrentBoard,
+    importBoard,
   };
 };

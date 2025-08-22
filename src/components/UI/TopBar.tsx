@@ -2,16 +2,14 @@ import React from 'react';
 import './TopBar.css';
 
 interface TopBarProps {
-  onUndo: () => void;
-  onRedo: () => void;
+  onImport: () => void;
+  onExport: () => void;
   onClear: () => void;
-  canUndo: boolean;
-  canRedo: boolean;
   hasUnsavedChanges: boolean;
   isSaving?: boolean;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ onUndo, onRedo, onClear, canUndo, canRedo, hasUnsavedChanges, isSaving = false }) => {
+const TopBar: React.FC<TopBarProps> = ({ onImport, onExport, onClear, hasUnsavedChanges, isSaving = false }) => {
   return (
     <div className="top-bar">
       <div className="app-title">
@@ -26,21 +24,19 @@ const TopBar: React.FC<TopBarProps> = ({ onUndo, onRedo, onClear, canUndo, canRe
       
       <div className="controls">
         <button
-          className={`control-btn ${!canUndo ? 'disabled' : ''}`}
-          onClick={onUndo}
-          disabled={!canUndo}
-          title="Undo (Ctrl+Z)"
+          className="control-btn"
+          onClick={onImport}
+          title="Import JSON file"
         >
-          ↶ Undo
+          📁 Import
         </button>
         
         <button
-          className={`control-btn ${!canRedo ? 'disabled' : ''}`}
-          onClick={onRedo}
-          disabled={!canRedo}
-          title="Redo (Ctrl+Y)"
+          className="control-btn"
+          onClick={onExport}
+          title="Export to JSON file"
         >
-          ↷ Redo
+          💾 Export
         </button>
         
         <button

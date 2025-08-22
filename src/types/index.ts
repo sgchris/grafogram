@@ -58,3 +58,41 @@ export interface HistoryState {
   canUndo: boolean;
   canRedo: boolean;
 }
+
+// File import/export types
+export interface GrafogramFileMetadata {
+  version: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  author?: string;
+  tags?: string[];
+  canvasSize: {
+    width: number;
+    height: number;
+  };
+}
+
+export interface GrafogramFileData {
+  metadata: GrafogramFileMetadata;
+  shapes: Shape[];
+}
+
+export interface GrafogramFile {
+  type: string;
+  data: GrafogramFileData;
+}
+
+export interface ExportOptions {
+  minify?: boolean;
+  includeTimestamp?: boolean;
+  includeMetadata?: boolean;
+}
+
+export interface ImportResult {
+  success: boolean;
+  data?: GrafogramFileData;
+  error?: string;
+  warnings?: string[];
+}

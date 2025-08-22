@@ -1,0 +1,63 @@
+{
+  "version": "1.0.0",
+  "board": {
+    "id": "test_board_001",
+    "name": "AI Generated Test",
+    "shapes": [
+      {
+        "id": "shape_rect_001",
+        "type": "rectangle",
+        "startPoint": { "x": 100, "y": 100 },
+        "endPoint": { "x": 300, "y": 200 },
+        "style": {
+          "color": "#3498db",
+          "strokeWidth": 2,
+          "fillColor": "#ebf3fd"
+        }
+      },
+      {
+        "id": "shape_text_001",
+        "type": "text",
+        "startPoint": { "x": 200, "y": 150 },
+        "endPoint": { "x": 200, "y": 150 },
+        "style": {
+          "color": "#2c3e50",
+          "strokeWidth": 2
+        },
+        "text": "AI Generated"
+      },
+      {
+        "id": "shape_arrow_001",
+        "type": "arrow",
+        "startPoint": { "x": 300, "y": 150 },
+        "endPoint": { "x": 400, "y": 150 },
+        "style": {
+          "color": "#e74c3c",
+          "strokeWidth": 3
+        }
+      },
+      {
+        "id": "shape_circle_001",
+        "type": "ellipse",
+        "startPoint": { "x": 400, "y": 125 },
+        "endPoint": { "x": 450, "y": 175 },
+        "style": {
+          "color": "#27ae60",
+          "strokeWidth": 2,
+          "fillColor": "#d5f4e6"
+        }
+      }
+    ],
+    "createdAt": "2025-08-22T14:00:00.000Z",
+    "updatedAt": "2025-08-22T14:30:00.000Z",
+    "canvasSize": {
+      "width": 800,
+      "height": 600
+    }
+  },
+  "metadata": {
+    "exportedAt": "2025-08-22T14:30:00.000Z",
+    "exportedBy": "AI Test Generator",
+    "formatVersion": "1.0.0"
+  }
+}
