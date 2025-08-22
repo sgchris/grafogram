@@ -169,8 +169,8 @@ Each shape in the `shapes` array follows this structure:
       {
         "id": "shape_001",
         "type": "rectangle",
-        "startPoint": { "x": 50, "y": 50 },
-        "endPoint": { "x": 200, "y": 120 },
+        "startPoint": { "x": 250, "y": 100 },
+        "endPoint": { "x": 400, "y": 170 },
         "style": {
           "color": "#2c3e50",
           "strokeWidth": 2,
@@ -180,8 +180,8 @@ Each shape in the `shapes` array follows this structure:
       {
         "id": "shape_002",
         "type": "text",
-        "startPoint": { "x": 125, "y": 85 },
-        "endPoint": { "x": 125, "y": 85 },
+        "startPoint": { "x": 325, "y": 135 },
+        "endPoint": { "x": 325, "y": 135 },
         "style": {
           "color": "#2c3e50",
           "strokeWidth": 2
@@ -191,8 +191,8 @@ Each shape in the `shapes` array follows this structure:
       {
         "id": "shape_003",
         "type": "arrow",
-        "startPoint": { "x": 200, "y": 85 },
-        "endPoint": { "x": 280, "y": 85 },
+        "startPoint": { "x": 400, "y": 135 },
+        "endPoint": { "x": 480, "y": 135 },
         "style": {
           "color": "#e74c3c",
           "strokeWidth": 3
@@ -201,8 +201,8 @@ Each shape in the `shapes` array follows this structure:
       {
         "id": "shape_004",
         "type": "ellipse",
-        "startPoint": { "x": 280, "y": 50 },
-        "endPoint": { "x": 380, "y": 120 },
+        "startPoint": { "x": 480, "y": 100 },
+        "endPoint": { "x": 580, "y": 170 },
         "style": {
           "color": "#27ae60",
           "strokeWidth": 2,
@@ -212,8 +212,8 @@ Each shape in the `shapes` array follows this structure:
       {
         "id": "shape_005",
         "type": "line",
-        "startPoint": { "x": 125, "y": 120 },
-        "endPoint": { "x": 125, "y": 180 },
+        "startPoint": { "x": 325, "y": 170 },
+        "endPoint": { "x": 325, "y": 230 },
         "style": {
           "color": "#8e44ad",
           "strokeWidth": 2
@@ -254,6 +254,49 @@ When creating Grafogram files programmatically:
    - Ellipse: startPoint = bounding box top-left, endPoint = bounding box bottom-right
    - Text: startPoint = text position, endPoint = same as startPoint
 
+## Canvas Layout & Safe Zones
+
+When generating coordinates for shapes, consider the Grafogram UI layout to ensure shapes don't overlap with toolbars:
+
+### UI Layout
+- **Top Bar**: Height of ~60px containing app title and controls
+- **Left Toolbars**: Two stacked toolbars on the left side for shape and tool selection
+- **Right Panel**: Boards management panel on the right side
+- **Canvas**: The main drawing area in the center
+
+### Safe Zones (Recommended Coordinate Boundaries)
+
+To ensure imported shapes are visible and don't overlap with UI elements:
+
+- **Left Boundary**: `x ≥ 220` pixels
+  - Accounts for: 20px margin + 180px toolbar width + 20px spacing
+  - Shapes with x-coordinates less than 220 may be covered by shape/tool toolbars
+
+- **Top Boundary**: `y ≥ 80` pixels  
+  - Accounts for: 60px top bar height + 20px spacing
+  - Shapes with y-coordinates less than 80 may be covered by the top navigation bar
+
+- **Right Boundary**: `x ≤ (canvas_width - 290)` pixels
+  - Accounts for: 250px boards panel width + 20px margin + 20px spacing
+  - Shapes extending beyond this may be covered by the boards panel
+
+### Automatic Coordinate Adjustment
+
+**Import Behavior**: When importing files, Grafogram automatically adjusts coordinates if shapes would overlap with UI elements:
+
+1. **Left Adjustment**: If any shape has x-coordinates < 220px, all shapes are shifted right
+2. **Top Adjustment**: If any shape has y-coordinates < 80px, all shapes are shifted down  
+3. **Preservation**: Shape relationships and relative positions are maintained during adjustment
+4. **Logging**: Coordinate adjustments are logged to the browser console for debugging
+
+### Recommended Coordinate Ranges
+
+For optimal compatibility across different screen sizes:
+
+- **Minimum coordinates**: `x: 220, y: 80`
+- **Maximum coordinates**: `x: 800, y: 600` (for typical 1200px wide canvas)
+- **Safe drawing area**: 580px wide × 520px tall (accounting for all UI elements)
+
 ## Validation Rules
 
 The importer validates:
@@ -285,10 +328,19 @@ Common import errors:
 When importing a Grafogram file:
 
 1. **File validation** - Checks JSON syntax and required structure
-2. **Name conflict resolution**:
+2. **Coordinate adjustment** - Automatically adjusts shapes if they would overlap with UI toolbars:
+   - **Left adjustment**: Shifts all shapes right if any x-coordinate < 220px
+   - **Top adjustment**: Shifts all shapes down if any y-coordinate < 80px
+   - **Relationship preservation**: Maintains relative positions between shapes
+   - **Console logging**: Reports any coordinate adjustments made
+3. **Name conflict resolution**:
    - If board name exists: **Overrides** existing board's shapes
    - If board name is new: **Creates** new board
-3. **Board activation** - Imported/updated board becomes the active board
-4. **Persistence** - Changes are automatically saved to localStorage
+4. **Board activation** - Imported/updated board becomes the active board
+5. **Persistence** - Changes are automatically saved to localStorage
+
+### Testing Coordinate Adjustment
+
+To test the automatic coordinate adjustment feature, create a JSON file with shapes that have coordinates outside the safe zones (e.g., x < 220 or y < 80). When imported, these shapes will be automatically repositioned to avoid overlapping with the UI toolbars while maintaining their relative layout.
 
 This format enables AI systems to easily generate diagrams for various use cases like system architecture, flowcharts, wireframes, and more.

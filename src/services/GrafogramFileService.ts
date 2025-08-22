@@ -23,6 +23,11 @@ export interface GrafogramFile {
 export class GrafogramFileService {
   private static readonly FORMAT_VERSION = '1.0.0';
   private static readonly EXPORTED_BY = 'Grafogram Online Sketch Board';
+  
+  // UI Layout constants - safe zones to avoid toolbar overlaps
+  private static readonly LEFT_TOOLBAR_SAFE_ZONE = 220; // 20px margin + 180px toolbar + 20px spacing
+  private static readonly RIGHT_BOARDS_SAFE_ZONE = 290; // 20px margin + 250px panel + 20px spacing
+  private static readonly TOP_HEADER_SAFE_ZONE = 80; // Top bar height + spacing
 
   /**
    * Exports a board to a JSON file and triggers download
@@ -142,18 +147,91 @@ export class GrafogramFileService {
   }
 
   /**
-   * Creates a Board object from the imported file
+   * Creates a Board object from the imported file with coordinate adjustments
    */
   private static createBoardFromFile(grafogramFile: GrafogramFile): Board {
     const boardData = grafogramFile.board;
     
+    // Adjust shapes coordinates to avoid toolbar overlaps
+    const adjustedShapes = this.adjustShapeCoordinates(boardData.shapes);
+    
     return {
       id: boardData.id,
       name: boardData.name,
-      shapes: boardData.shapes,
+      shapes: adjustedShapes,
       createdAt: new Date(boardData.createdAt),
       updatedAt: new Date(boardData.updatedAt),
     };
+  }
+
+  /**
+   * Adjusts shape coordinates to ensure they don't overlap with UI toolbars
+   */
+  private static adjustShapeCoordinates(shapes: Shape[]): Shape[] {
+    if (shapes.length === 0) return shapes;
+
+    // Find the bounding box of all shapes
+    let minX = Number.MAX_VALUE;
+    let minY = Number.MAX_VALUE;
+    let maxX = Number.MIN_VALUE;
+    let maxY = Number.MIN_VALUE;
+
+    shapes.forEach(shape => {
+      const startX = Math.min(shape.startPoint.x, shape.endPoint.x);
+      const startY = Math.min(shape.startPoint.y, shape.endPoint.y);
+      const endX = Math.max(shape.startPoint.x, shape.endPoint.x);
+      const endY = Math.max(shape.startPoint.y, shape.endPoint.y);
+
+      minX = Math.min(minX, startX);
+      minY = Math.min(minY, startY);
+      maxX = Math.max(maxX, endX);
+      maxY = Math.max(maxY, endY);
+    });
+
+    // Calculate adjustments needed
+    let offsetX = 0;
+    let offsetY = 0;
+
+    // Check if shapes are too close to left toolbar
+    if (minX < this.LEFT_TOOLBAR_SAFE_ZONE) {
+      offsetX = this.LEFT_TOOLBAR_SAFE_ZONE - minX;
+    }
+
+    // Check if shapes are too close to top
+    if (minY < this.TOP_HEADER_SAFE_ZONE) {
+      offsetY = this.TOP_HEADER_SAFE_ZONE - minY;
+    }
+
+    // Check if shapes extend too far to the right (need canvas width for this)
+    const currentCanvas = document.querySelector('canvas');
+    if (currentCanvas) {
+      const canvasWidth = currentCanvas.width;
+      const availableWidth = canvasWidth - this.RIGHT_BOARDS_SAFE_ZONE;
+      
+      if (maxX + offsetX > availableWidth) {
+        // If shapes would extend beyond available width, prioritize left margin
+        // and let shapes extend to the right (user can scroll if needed)
+        console.warn('Imported shapes extend beyond available canvas width');
+      }
+    }
+
+    // Apply offset to all shapes if needed
+    if (offsetX > 0 || offsetY > 0) {
+      console.log(`Adjusting imported shapes by offset: x=${offsetX}, y=${offsetY}`);
+      return shapes.map(shape => ({
+        ...shape,
+        startPoint: {
+          x: shape.startPoint.x + offsetX,
+          y: shape.startPoint.y + offsetY
+        },
+        endPoint: {
+          x: shape.endPoint.x + offsetX,
+          y: shape.endPoint.y + offsetY
+        }
+      }));
+    }
+
+    return shapes;
   }
 
   /**
