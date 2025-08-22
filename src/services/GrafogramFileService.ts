@@ -152,20 +152,20 @@ export class GrafogramFileService {
   private static createBoardFromFile(grafogramFile: GrafogramFile): Board {
     const boardData = grafogramFile.board;
     
-    // Adjust shapes coordinates to avoid toolbar overlaps
-    const adjustedShapes = this.adjustShapeCoordinates(boardData.shapes);
+    // Center the diagram on screen while avoiding toolbar overlaps
+    const centeredShapes = this.adjustShapeCoordinates(boardData.shapes);
     
     return {
       id: boardData.id,
       name: boardData.name,
-      shapes: adjustedShapes,
+      shapes: centeredShapes,
       createdAt: new Date(boardData.createdAt),
       updatedAt: new Date(boardData.updatedAt),
     };
   }
 
   /**
-   * Adjusts shape coordinates to ensure they don't overlap with UI toolbars
+   * Adjusts shape coordinates to center the diagram on the screen
    */
   private static adjustShapeCoordinates(shapes: Shape[]): Shape[] {
     if (shapes.length === 0) return shapes;
@@ -188,50 +188,85 @@ export class GrafogramFileService {
       maxY = Math.max(maxY, endY);
     });
 
-    // Calculate adjustments needed
-    let offsetX = 0;
-    let offsetY = 0;
+    // Calculate diagram dimensions
+    const diagramWidth = maxX - minX;
+    const diagramHeight = maxY - minY;
 
-    // Check if shapes are too close to left toolbar
-    if (minX < this.LEFT_TOOLBAR_SAFE_ZONE) {
-      offsetX = this.LEFT_TOOLBAR_SAFE_ZONE - minX;
-    }
-
-    // Check if shapes are too close to top
-    if (minY < this.TOP_HEADER_SAFE_ZONE) {
-      offsetY = this.TOP_HEADER_SAFE_ZONE - minY;
-    }
-
-    // Check if shapes extend too far to the right (need canvas width for this)
+    // Get current canvas dimensions or use defaults
     const currentCanvas = document.querySelector('canvas');
+    let canvasWidth = 800;
+    let canvasHeight = 600;
+    
     if (currentCanvas) {
-      const canvasWidth = currentCanvas.width;
-      const availableWidth = canvasWidth - this.RIGHT_BOARDS_SAFE_ZONE;
-      
-      if (maxX + offsetX > availableWidth) {
-        // If shapes would extend beyond available width, prioritize left margin
-        // and let shapes extend to the right (user can scroll if needed)
-        console.warn('Imported shapes extend beyond available canvas width');
+      canvasWidth = currentCanvas.width;
+      canvasHeight = currentCanvas.height;
+    }
+
+    // Calculate available space (canvas minus UI elements)
+    const availableWidth = canvasWidth - this.LEFT_TOOLBAR_SAFE_ZONE - this.RIGHT_BOARDS_SAFE_ZONE;
+    const availableHeight = canvasHeight - this.TOP_HEADER_SAFE_ZONE - 40; // 40px bottom margin
+
+    // Calculate center position within available space
+    const centerX = this.LEFT_TOOLBAR_SAFE_ZONE + (availableWidth / 2);
+    const centerY = this.TOP_HEADER_SAFE_ZONE + (availableHeight / 2);
+
+    // Calculate target position for the diagram's center
+    const diagramCenterX = minX + (diagramWidth / 2);
+    const diagramCenterY = minY + (diagramHeight / 2);
+
+    // Calculate offset needed to center the diagram
+    const offsetX = centerX - diagramCenterX;
+    const offsetY = centerY - diagramCenterY;
+
+    // Apply safety checks to ensure shapes stay within bounds
+    const finalMinX = minX + offsetX;
+    const finalMaxX = maxX + offsetX;
+    const finalMinY = minY + offsetY;
+    const finalMaxY = maxY + offsetY;
+
+    let adjustedOffsetX = offsetX;
+    let adjustedOffsetY = offsetY;
+
+    // Adjust if diagram would go outside left boundary
+    if (finalMinX < this.LEFT_TOOLBAR_SAFE_ZONE) {
+      adjustedOffsetX = this.LEFT_TOOLBAR_SAFE_ZONE - minX;
+    }
+
+    // Adjust if diagram would go outside right boundary
+    if (finalMaxX > canvasWidth - this.RIGHT_BOARDS_SAFE_ZONE) {
+      adjustedOffsetX = (canvasWidth - this.RIGHT_BOARDS_SAFE_ZONE) - maxX;
+    }
+
+    // Adjust if diagram would go outside top boundary
+    if (finalMinY < this.TOP_HEADER_SAFE_ZONE) {
+      adjustedOffsetY = this.TOP_HEADER_SAFE_ZONE - minY;
+    }
+
+    // Adjust if diagram would go outside bottom boundary
+    if (finalMaxY > canvasHeight - 40) {
+      adjustedOffsetY = (canvasHeight - 40) - maxY;
+    }
+
+    // Log the centering operation
+    console.log(`Centering imported diagram:
+      - Original bounds: (${minX}, ${minY}) to (${maxX}, ${maxY})
+      - Diagram size: ${diagramWidth}×${diagramHeight}
+      - Available space: ${availableWidth}×${availableHeight}
+      - Target center: (${centerX}, ${centerY})
+      - Applied offset: (${adjustedOffsetX}, ${adjustedOffsetY})`);
+
+    // Apply the calculated offset to all shapes
+    return shapes.map(shape => ({
+      ...shape,
+      startPoint: {
+        x: shape.startPoint.x + adjustedOffsetX,
+        y: shape.startPoint.y + adjustedOffsetY
+      },
+      endPoint: {
+        x: shape.endPoint.x + adjustedOffsetX,
+        y: shape.endPoint.y + adjustedOffsetY
       }
-    }
-
-    // Apply offset to all shapes if needed
-    if (offsetX > 0 || offsetY > 0) {
-      console.log(`Adjusting imported shapes by offset: x=${offsetX}, y=${offsetY}`);
-      return shapes.map(shape => ({
-        ...shape,
-        startPoint: {
-          x: shape.startPoint.x + offsetX,
-          y: shape.startPoint.y + offsetY
-        },
-        endPoint: {
-          x: shape.endPoint.x + offsetX,
-          y: shape.endPoint.y + offsetY
-        }
-      }));
-    }
-
-    return shapes;
+    }));
   }
 
   /**

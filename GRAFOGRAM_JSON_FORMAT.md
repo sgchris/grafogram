@@ -256,7 +256,7 @@ When creating Grafogram files programmatically:
 
 ## Canvas Layout & Safe Zones
 
-When generating coordinates for shapes, consider the Grafogram UI layout to ensure shapes don't overlap with toolbars:
+When generating coordinates for shapes, you have full flexibility in positioning since Grafogram automatically centers imported diagrams:
 
 ### UI Layout
 - **Top Bar**: Height of ~60px containing app title and controls
@@ -264,38 +264,30 @@ When generating coordinates for shapes, consider the Grafogram UI layout to ensu
 - **Right Panel**: Boards management panel on the right side
 - **Canvas**: The main drawing area in the center
 
-### Safe Zones (Recommended Coordinate Boundaries)
+### Automatic Centering System
 
-To ensure imported shapes are visible and don't overlap with UI elements:
+**No Positioning Constraints**: AI and users can use any coordinate system when creating Grafogram files. The import process automatically:
 
-- **Left Boundary**: `x ≥ 220` pixels
-  - Accounts for: 20px margin + 180px toolbar width + 20px spacing
-  - Shapes with x-coordinates less than 220 may be covered by shape/tool toolbars
+- **Centers the diagram**: Positions the entire diagram at the screen center
+- **Avoids UI overlaps**: Ensures shapes don't get covered by toolbars
+- **Preserves layouts**: Maintains relative positioning between shapes
+- **Handles any scale**: Works with diagrams of any size or coordinate range
 
-- **Top Boundary**: `y ≥ 80` pixels  
-  - Accounts for: 60px top bar height + 20px spacing
-  - Shapes with y-coordinates less than 80 may be covered by the top navigation bar
+### Safe Zones (For Reference Only)
 
-- **Right Boundary**: `x ≤ (canvas_width - 290)` pixels
-  - Accounts for: 250px boards panel width + 20px margin + 20px spacing
-  - Shapes extending beyond this may be covered by the boards panel
+These zones are automatically handled during import, but for reference:
 
-### Automatic Coordinate Adjustment
+- **Left Boundary**: `x ≥ 220` pixels (shape/tool toolbars)
+- **Top Boundary**: `y ≥ 80` pixels (top navigation bar)  
+- **Right Boundary**: `x ≤ (canvas_width - 290)` pixels (boards panel)
 
-**Import Behavior**: When importing files, Grafogram automatically adjusts coordinates if shapes would overlap with UI elements:
+### Coordinate System Flexibility
 
-1. **Left Adjustment**: If any shape has x-coordinates < 220px, all shapes are shifted right
-2. **Top Adjustment**: If any shape has y-coordinates < 80px, all shapes are shifted down  
-3. **Preservation**: Shape relationships and relative positions are maintained during adjustment
-4. **Logging**: Coordinate adjustments are logged to the browser console for debugging
-
-### Recommended Coordinate Ranges
-
-For optimal compatibility across different screen sizes:
-
-- **Minimum coordinates**: `x: 220, y: 80`
-- **Maximum coordinates**: `x: 800, y: 600` (for typical 1200px wide canvas)
-- **Safe drawing area**: 580px wide × 520px tall (accounting for all UI elements)
+**For AI Generation**: Use whatever coordinate system is most convenient:
+- **Small scale**: Coordinates from 0-100 work fine
+- **Large scale**: Coordinates in the thousands work fine  
+- **Negative coordinates**: Also supported and will be adjusted
+- **Arbitrary positioning**: Focus on shape relationships, not absolute positioning
 
 ## Validation Rules
 
@@ -328,19 +320,20 @@ Common import errors:
 When importing a Grafogram file:
 
 1. **File validation** - Checks JSON syntax and required structure
-2. **Coordinate adjustment** - Automatically adjusts shapes if they would overlap with UI toolbars:
-   - **Left adjustment**: Shifts all shapes right if any x-coordinate < 220px
-   - **Top adjustment**: Shifts all shapes down if any y-coordinate < 80px
+2. **Diagram centering** - Automatically centers the entire diagram on the screen:
+   - **Bounding box calculation**: Analyzes all shapes to determine diagram dimensions
+   - **Center positioning**: Places diagram center at the screen center (accounting for UI elements)
+   - **Boundary safety**: Ensures shapes remain within safe zones while maintaining centering
    - **Relationship preservation**: Maintains relative positions between shapes
-   - **Console logging**: Reports any coordinate adjustments made
+   - **Console logging**: Reports centering calculations and final positioning
 3. **Name conflict resolution**:
    - If board name exists: **Overrides** existing board's shapes
    - If board name is new: **Creates** new board
 4. **Board activation** - Imported/updated board becomes the active board
 5. **Persistence** - Changes are automatically saved to localStorage
 
-### Testing Coordinate Adjustment
+### Testing Diagram Centering
 
-To test the automatic coordinate adjustment feature, create a JSON file with shapes that have coordinates outside the safe zones (e.g., x < 220 or y < 80). When imported, these shapes will be automatically repositioned to avoid overlapping with the UI toolbars while maintaining their relative layout.
+To test the automatic centering feature, create a JSON file with shapes positioned anywhere on the coordinate system. When imported, the entire diagram will be moved so that it appears centered on the screen, regardless of the original coordinates. The relative layout between shapes is preserved during this centering process.
 
 This format enables AI systems to easily generate diagrams for various use cases like system architecture, flowcharts, wireframes, and more.
