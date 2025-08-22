@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import { Board, Shape } from '../types';
 import { generateId } from '../utils';
 import { GrafogramFileService } from '../services/GrafogramFileService';
@@ -157,15 +158,27 @@ export const useBoards = () => {
   }, []);
 
   const overrideBoardShapes = useCallback((boardId: string, shapes: Shape[]) => {
-    setBoards(prev => prev.map(board => 
-      board.id === boardId 
-        ? { ...board, shapes, updatedAt: new Date() }
-        : board
-    ));
+    const updatedAt = new Date();
     
-    // Update active board if it's the one being overridden
+    // Use flushSync to ensure synchronous state updates
+    flushSync(() => {
+      setBoards(prev => prev.map(board => 
+        board.id === boardId 
+          ? { ...board, shapes, updatedAt }
+          : board
+      ));
+    });
+    
+    // Force activeBoard update with new object reference if it's the one being overridden
     if (activeBoard?.id === boardId) {
-      setActiveBoard(prev => prev ? { ...prev, shapes, updatedAt: new Date() } : null);
+      const updatedActiveBoard = { 
+        ...activeBoard, 
+        shapes: [...shapes], // Create new array reference
+        updatedAt 
+      };
+      flushSync(() => {
+        setActiveBoard(updatedActiveBoard);
+      });
     }
   }, [activeBoard]);
 
@@ -204,11 +217,18 @@ export const useBoards = () => {
           if (existingBoard) {
             // Override existing board's shapes
             overrideBoardShapes(existingBoard.id, importedBoard.shapes);
-            setActiveBoard(existingBoard);
+            
+            // If it's not the currently active board, select it
+            if (activeBoard?.id !== existingBoard.id) {
+              // Find the updated board and make it active
+              const updatedBoard = boards.find(board => board.id === existingBoard.id);
+              if (updatedBoard) {
+                setActiveBoard({ ...updatedBoard, shapes: importedBoard.shapes, updatedAt: new Date() });
+              }
+            }
           } else {
             // Create new board
-            const newBoard = createBoardWithShapes(importedBoard.name, importedBoard.shapes);
-            setActiveBoard(newBoard);
+            createBoardWithShapes(importedBoard.name, importedBoard.shapes);
           }
           
           resolve();
@@ -219,7 +239,7 @@ export const useBoards = () => {
 
       input.click();
     });
-  }, [findBoardByName, overrideBoardShapes, createBoardWithShapes]);
+  }, [findBoardByName, overrideBoardShapes, createBoardWithShapes, activeBoard, boards]);
 
   return {
     boards,
